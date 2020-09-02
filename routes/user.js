@@ -46,7 +46,52 @@ router.post('/verify/', async (req, res) => {
 
 
 
+router.post('/verify/resend', async(req,res) => {
 
+    const token = req.headers.authorization.split(" ")[1]
+
+    if(!req.headers.authorization){
+        console.log('no auth')
+        return res.status(400).json({errors: [{msg: "Auth Please"}]})
+    }
+
+
+    try{
+
+        const {id} = await jwt.verify(token, JWT_SECRET)
+
+        const user = await User.findById(id)
+
+
+        const emailToken = jwt.sign({id}, JWT_SECRET+'email', {expiresIn: "1d"})
+
+
+        const msg = {
+            to: user.email,
+            from: {
+              email: "support@hseapps.org",
+              name: "HSE Apps"
+            },
+            templateId: templates.emailVerification,
+            dynamic_template_data: {
+              emailToken: emailToken
+            }
+          }
+        
+        await sgMail.send(msg, (err) => {
+            if(err){
+                console.log(err)
+            }
+        })
+
+        res.send("Success")
+
+    } catch (err) {
+        console.log(err)
+        res.status(400).send("Error")
+    }
+  
+})
 
 
 
@@ -233,7 +278,7 @@ router.post('/signup',
                 role = 'student'
             }
 
-            const user = new User({email,password: hashedPW, name, role})
+            const user = new User({email,password: hashedPW, name, role, dateRegistered: Date.now()})
             user.save()
             
             const token = jwt.sign({id: user._id}, JWT_SECRET, {expiresIn: "4hr"})

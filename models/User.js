@@ -19,8 +19,7 @@ const User = new mongoose.Schema({
         default: "https://storage.cloud.google.com/hse-key-bucket/default.png"
     },
     dateRegistered:{
-        type: Date,
-        default: Date.now()
+        type: Date
     },
     verified:{
         type:Boolean,
