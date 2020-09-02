@@ -29,5 +29,5 @@ app.get('/', async (req, res) => {
 })
 
 
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 8080
 app.listen(PORT, (err) => err ? console.log(err) : console.log(`Running on port ${PORT}`))

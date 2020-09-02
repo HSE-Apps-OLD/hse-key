@@ -1,4 +1,5 @@
 const express = require('express')
+const sgMail = require('@sendgrid/mail')
 const phone = require('phone')
 const router = express.Router()
 const User = require('../models/User')
@@ -8,24 +9,33 @@ const { body, validationResult } = require('express-validator');
 
 
 const {config} = require('../config')
-const {JWT_SECRET} = config
+const {JWT_SECRET, SG_KEY} = config
 
 
+
+
+sgMail.setApiKey(SG_KEY)
+
+
+const templates = {
+    emailVerification: "d-f3b28e521c2d447086f3e9c4068cf36c"
+    }
 
 
 
 // Verifies account
 
-router.get('/verify/:token', async (req, res) => {
-    const {token} = req.params
+router.post('/verify/', async (req, res) => {
+    const {token} = req.body
+    console.log(token)
     try{
-        const payload = await jwt.verify(token)
+        const payload = await jwt.verify(token, JWT_SECRET+"email")
         const {id} = payload
         await User.updateOne({_id: id}, {verified: true})
         res.send("Success")
     } catch (err) {
         console.log(err)
-        res.send("fail")
+        res.status(400).send("fail")
     }
 })
 
@@ -227,21 +237,28 @@ router.post('/signup',
             user.save()
             
             const token = jwt.sign({id: user._id}, JWT_SECRET, {expiresIn: "4hr"})
-            // Send Email verficiation
-            // const emailToken = jwt.sign({id: user._id}, JWT_SECRET, {expiresIn: "1d"})
 
-            // const data = {
-            //     from: 'Preston <prestonmccrary@gmail.com>',
-            //     to: email,
-            //     subject: 'HSE Key | Email Verification',
-            //     html: `<a href="https://hse-key.ue.r.appspot.com/user/verify/${emailToken}">Verify Your Email</a>`
-            // }
-            // mg.messages().send(data, (err, body) => {
-            //     if(err){
-            //         console.log(err)
-            //     } 
-            //     console.log(body)
-            // })
+            const emailToken = jwt.sign({id: user._id}, JWT_SECRET+'email', {expiresIn: "1d"})
+
+
+            const msg = {
+                to: user.email,
+                from: {
+                  email: "support@hseapps.org",
+                  name: "HSE Apps"
+                },
+                templateId: templates.emailVerification,
+                dynamic_template_data: {
+                  emailToken: emailToken
+                }
+              }
+            
+            await sgMail.send(msg, (err) => {
+                if(err){
+                    console.log(err)
+                }
+            })
+            
 
             res.send(token)
         } catch (err) {
