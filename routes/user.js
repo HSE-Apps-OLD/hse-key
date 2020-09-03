@@ -18,7 +18,8 @@ sgMail.setApiKey(SG_KEY)
 
 
 const templates = {
-    emailVerification: "d-f3b28e521c2d447086f3e9c4068cf36c"
+    emailVerification: "d-f3b28e521c2d447086f3e9c4068cf36c",
+    passwordReset: "d-d8dcbf07d79545959e08a7ca8a13965c"
     }
 
 
@@ -41,10 +42,70 @@ router.post('/verify/', async (req, res) => {
 
 
 
-//
+// Sends password reset email
+
+router.put('/password/reset/', async(req,res) => {
+
+    const {email} = req.body
+
+    try{
+
+        
+
+        const [user] = await User.find({email: email})
+        console.log(user.email)
+
+        const passwordResetToken = await jwt.sign({id: user._id}, JWT_SECRET+'pw', {expiresIn: "1d"})
 
 
+        const msg = {
+            to: user.email,
+            from: {
+              email: "support@hseapps.org",
+              name: "HSE Apps"
+            },
+            templateId: templates.passwordReset,
+            dynamic_template_data: {
+                passwordResetToken: passwordResetToken
+            }
+          }
+        
+        await sgMail.send(msg, (err) => {
+            if(err){
+                console.log(err)
+            }
+        })
 
+
+        res.send("Success")
+
+    } catch (err) {
+        console.log(err)
+        res.status(400).send("fail")
+    }
+})
+
+router.put('/password/', async(req,res) => {
+
+    //token comes from url in email
+
+    const {token, password} = req.body
+    console.log(token)
+
+    try{
+        const {id} = await jwt.verify(token, JWT_SECRET+"pw")
+        
+        const hashedPW = await bcrypt.hash(password, 12)
+
+
+        await User.updateOne({_id: id}, {password: hashedPW})
+
+        res.send("Success")
+    } catch (err) {
+        console.log(err)
+        res.status(400).send("fail")
+    }
+})
 
 router.post('/verify/resend', async(req,res) => {
 
