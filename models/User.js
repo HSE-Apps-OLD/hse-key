@@ -35,6 +35,10 @@ const User = new mongoose.Schema({
     role:{
         type: String,
         enum: ['teacher', 'student']
+    },
+    earlyAdopter:{
+        type: Boolean,
+        default: false
     }
 })
 

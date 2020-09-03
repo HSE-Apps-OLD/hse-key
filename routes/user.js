@@ -212,7 +212,8 @@ router.put('/',
         body('name').notEmpty().contains(" ").withMessage("Enter your full name"),
         body("phone").isMobilePhone().withMessage("Enter a valid phone"),
         body('class').trim().isNumeric().withMessage("Enter a valid class name"),
-        body('img').isURL()
+        body('img').isURL(),
+        body('earlyAdopter').isBoolean(),
     ], 
     async (req,res) => {
 
@@ -266,6 +267,7 @@ router.put('/',
             }
 
 
+            
             if(req.body.class){
                 const classError = errors.some((error) => error.param == 'class')
                 if(!classError){
@@ -288,6 +290,9 @@ router.put('/',
                     return res.status(500).json({errors: [{msg: "Enter a valid phone number"}]})
                 }
             }
+
+            console.log(req.body.earlyAdopter)
+            user.earlyAdopter = req.body.earlyAdopter
 
             user.save()
             res.json(user)
