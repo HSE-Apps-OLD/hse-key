@@ -324,7 +324,7 @@ router.post('/signup',
 
         const domain = email.split("@")[1]
 
-        if(domain != "gmail.com" && domain != "hsestudents.org"){
+        if(domain != "hse.k12.in.us" && domain != "hsestudents.org"){
             return res.status(400).json({errors: [{msg: "Your must use your HSE email"}]})
         }
 
@@ -338,7 +338,7 @@ router.post('/signup',
             const hashedPW = await bcrypt.hash(password, 12)
 
             let role;
-            if(domain == "hsestudents.org"){
+            if(domain == "hse.k12.in.us"){
                 role = 'teacher'
             } else {
                 role = 'student'
