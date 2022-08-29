@@ -25,7 +25,7 @@ app.use("/user", user)
 app.use("/phone", phone)
 
 app.get('/', async (req, res) => {
-    res.send('hi')
+    res.send('hey')
 })
 
 
