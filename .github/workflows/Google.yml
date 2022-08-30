@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    
+
     - id: 'auth'
       uses: 'google-github-actions/auth@v0'
       with:
@@ -27,5 +27,5 @@ jobs:
         project_id: ${{ secrets.GCP_PROJECT_ID }}
         
 
-    - id: 'test'
+    - id: 'finish'
       run: 'curl "${{ steps.deploy.outputs.url }}"'
