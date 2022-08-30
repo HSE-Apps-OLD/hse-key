@@ -1,5 +1,5 @@
 
-name: CI
+name: GoogleDeploy
 
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch
@@ -23,7 +23,7 @@ jobs:
       uses: 'google-github-actions/deploy-appengine@v0'
       with:
         project_id: ${{ secrets.GCP_PROJECT_ID }}
-        deliverables: 'app.yaml'
         
+
     - id: 'test'
       run: 'curl "${{ steps.deploy.outputs.url }}"'
