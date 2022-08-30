@@ -1,3 +1,2 @@
 runtime: nodejs12
-service: hse-key
 entrypoint: node setup.js
